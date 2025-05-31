@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "750827144180",
+    "project_id": "reactnative-test-a8ec7",
+    "storage_bucket": "reactnative-test-a8ec7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750827144180:android:2e9c6ba31ae7d2fe9aefa1",
+        "android_client_info": {
+          "package_name": "com.jeiiimarc.test"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAKh0NgN2oyYGgqI3dNxWWj5elxviavXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

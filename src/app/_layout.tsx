@@ -1,8 +1,8 @@
-import { Stack, Redirect, SplashScreen, router } from "expo-router";
+import { Stack, SplashScreen } from "expo-router";
 import "../../global.css";
 import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { AuthProvider, useAuth } from '../contexts/AuthContext'; // Import your AuthProvider and useAuth
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
 
 // Keep the splash screen visible until the authentication state is checked
 SplashScreen.preventAutoHideAsync();
@@ -10,34 +10,25 @@ SplashScreen.preventAutoHideAsync();
 function AppWrapper() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  useEffect(() => {
-    if (!isLoading) {
-      // Once loading is complete, redirect based on auth status
-      if (isAuthenticated) {
-        router.replace('/(app)'); // Go to main app if authenticated
-      } else {
-        router.replace('/(auth)/login'); // Go to login if not authenticated
-      }
-    }
-  }, [isAuthenticated, isLoading]); // Depend on isAuthenticated and isLoading
+  // No need for manual navigation here - let the router handle it naturally
+  // based on the file structure and authentication state
 
   if (isLoading) {
-    // While loading, you might show nothing or a custom loading screen
-    return null; // Or a custom <LoadingScreen /> component
+    // While loading, show nothing (splash screen is still visible)
+    return null;
   }
 
   return (
     <React.Fragment>
       <StatusBar style="auto" />
-      {isAuthenticated ? (
-        // If authenticated, render the main app stack
-        // This will automatically pick up src/app/(app)/_layout.tsx
-        <Stack screenOptions={{ headerShown: false }} />
-      ) : (
-        // If not authenticated, render the authentication stack
-        // This will automatically pick up src/app/(auth)/_layout.tsx
-        <Stack screenOptions={{ headerShown: false }} />
-      )}
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* 
+          Expo Router will automatically handle routing based on:
+          - If authenticated: show (app) routes
+          - If not authenticated: show (auth) routes
+          You can also add specific redirects in individual _layout files
+        */}
+      </Stack>
     </React.Fragment>
   );
 }

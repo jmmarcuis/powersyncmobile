@@ -4,7 +4,7 @@ import { Link } from "expo-router";
 
 export default function SettingsScreen() {
   return (
-    <View className="justify-center flex-1 p-4">
+    <View className="justify-center flex-1 p-4 bg-bgdark">
       <AppText center>
         This is the Settings Screen.
       </AppText>

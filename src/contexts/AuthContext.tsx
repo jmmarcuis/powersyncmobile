@@ -1,53 +1,54 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { router, SplashScreen } from 'expo-router'; // Import router for programmatic navigation
-import * as SecureStore from 'expo-secure-store'; // For storing tokens securely
+import { router, SplashScreen } from 'expo-router';
+import { onAuthStateChanged, signOut as firebaseSignOut, User } from 'firebase/auth';
+import { auth } from '../../firebaseConfig'; // Your firebase config file
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  signIn: (token: string) => Promise<void>;
+  user: any; // You can type this more specifically with Firebase User type
   signOut: () => Promise<void>;
-  isLoading: boolean; // To indicate if auth state is being checked
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Initial loading state
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadAuthStatus = async () => {
-      try {
-        // Check for a stored token or user session
-        const userToken = await SecureStore.getItemAsync('userToken'); // Example
-        if (userToken) {
-          setIsAuthenticated(true);
-        }
-      } catch (e) {
-        console.error("Failed to load auth status:", e);
-        // Handle error, e.g., token invalid or corrupted
-      } finally {
-        setIsLoading(false);
-        SplashScreen.hideAsync(); // Hide splash screen once auth status is determined
+    // Listen to Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // User is signed in
+        setIsAuthenticated(true);
+        setUser(firebaseUser);
+      } else {
+        // User is signed out
+        setIsAuthenticated(false);
+        setUser(null);
       }
-    };
+      setIsLoading(false);
+      SplashScreen.hideAsync(); // Hide splash screen once auth state is determined
+    });
 
-    loadAuthStatus();
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
-  const signIn = async (token: string) => {
-    setIsAuthenticated(true);
-    // Navigate to the main app routes after successful sign-in
-    router.replace('/(app)');
-  };
-
   const signOut = async () => {
-    setIsAuthenticated(false);
-    router.replace('/(auth)/login');
+    try {
+      await firebaseSignOut(auth);
+      // onAuthStateChanged will handle updating the state
+      router.replace('/(auth)/login');
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, signIn, signOut, isLoading }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, signOut, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
