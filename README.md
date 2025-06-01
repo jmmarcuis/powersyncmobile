@@ -1,24 +1,36 @@
-# Expo starter
+# PowerSync
 
-A plain project with the usual suspects set up:
 
-- Expo Router
-- Nativewind
-- ESLint & Prettier
-- TypeScript
-
-It also contains two components:
-- `src/components/AppText.tsx` for text
-- `src/components/Button.tsx` for 3 button variants
-
-And one utility:
-- `src/utils/cn.ts` for merging Tailwind classes
 
 ## Start a new project with this template
 
+To duplicate the repository, install the libraries, and run the project on an iOS device using Expo Go, follow these steps:
+
+### Clone the Repository
+
 ```sh
-git clone git@github.com:kadikraman/expo-starter.git my-app
-cd my-app
-cd my-app && rm -rf .git && git init && git add . && git commit -m "Initial commit"
-bun install # or remove the bun.lock file and use a different package manager
+git clone https://github.com/jmmarcuis/powersyncmobile.git
+cd powersync
+ ```
+
+### Install Dependencies
+
+```sh
+npm install
+# or if not workng
+npx install
+
 ```
+
+### Run the Project on iOS with Expo Go
+
+1. Start the development server:
+    ```sh
+    npx expo start
+    ```
+
+2. Open the Expo Go app on your iOS device.
+
+3. Scan the QR code displayed in your terminal or browser to load the project.
+
+ 
