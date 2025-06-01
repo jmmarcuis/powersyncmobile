@@ -21,10 +21,10 @@ export function AppText({
   return (
     <Text
       className={cn(
-        size === "small" && "text-sm mb-2",
-        size === "medium" && "text-base mb-3",
-        size === "large" && "text-lg mb-4",
-        size === "heading" && "text-xl mb-5",
+        size === "small" && "text-sm ",
+        size === "medium" && "text-base ",
+        size === "large" && "text-lg ",
+        size === "heading" && "text-xl ",
         bold && "font-bold",
         color === "primary" && "text-black",
         color === "secondary" && "text-gray-500",
