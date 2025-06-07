@@ -1,13 +1,19 @@
-import { View, ScrollView, TouchableOpacity } from "react-native";
-import { AppText } from "@/components/AppText";
-import { useAuth } from "../../contexts/AuthContext";
-import { Button } from "@/components/Button";
-import React, { useState } from "react";
+// app/(app)/settings.tsx (Updated version)
+import { View, ScrollView, TouchableOpacity, Image } from "react-native";
+import React from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { AppText } from "@/components/AppText";
+import { SkeletonLoader } from "@/components/SkeletonLoader";
+import { Button } from "@/components/Button";
+import { useAuth } from "../../contexts/AuthContext";
+import { useUserProfile } from "../../hooks/UserHooks";
+import { useRouter } from "expo-router";
 
 export default function SettingsScreen() {
+  const { userProfile, loadingProfile } = useUserProfile();
+  const router = useRouter();
+  // Handle Firebase sign out
   const { signOut } = useAuth();
-
   const handleLogout = async () => {
     console.log("Attempting Firebase logout...");
     try {
@@ -19,6 +25,15 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleGoBacktoIndex = () => {
+    router.replace("/");
+  };
+
+  const handleGotoEditProfile = () => {
+    router.push("/(modal)/edit-profile");
+  }
+
+  // Placeholder function for actions that will be implemented later
   const placeholderAction = (action: string) => {
     console.log(`${action} pressed`);
     alert(`${action} action triggered! This will be a new feature in the upcoming updates`);
@@ -28,11 +43,11 @@ export default function SettingsScreen() {
     <View className="flex-1 bg-neutral-900">
       {/* Header */}
       <View className="flex-row items-center p-4 pt-12 bg-neutral-900">
-        <TouchableOpacity onPress={() => placeholderAction("Go Back")} className="p-2">
+        <TouchableOpacity onPress={handleGoBacktoIndex} className="p-2">
           <MaterialCommunityIcons name="arrow-left" size={24} color="#C6F806" />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <AppText className="text-2xl text-white font-bold ml-[-32px]">Profile</AppText>
+          <AppText className="text-xl text-white font-bold ml-[-32px]">Profile</AppText>
         </View>
       </View>
 
@@ -41,27 +56,62 @@ export default function SettingsScreen() {
         contentContainerStyle={{ paddingBottom: 30, paddingHorizontal: 16 }}
       >
         {/* Profile Section */}
-        <View className="items-center mt-6 mb-8">
-          <View className="w-28 h-28 bg-neutral-700 rounded-full mb-3 items-center justify-center">
-            <MaterialCommunityIcons name="account-circle" size={56} color="#C6F806" />
+        <View className="items-center mt-5 mb-8">
+          <View className="w-28 h-28 bg-neutral-700 rounded-full items-center justify-center">
+            {loadingProfile ? (
+              <SkeletonLoader width={112} height={112} />
+            ) : userProfile?.profileImageUrl ? (
+              <Image
+                source={{ uri: userProfile.profileImageUrl }}
+                className="w-28 h-28 rounded-full"
+                resizeMode="cover"
+              />
+            ) : (
+              <MaterialCommunityIcons name="account-circle" size={56} color="#C6F806" />
+            )}
           </View>
-          <AppText className="text-3xl text-white font-semibold">User</AppText>
-          <Button title="Edit Profile" onPress={() => placeholderAction("Edit Profile Main")} />
+          <View className="my-4 items-center">
+            {loadingProfile ? (
+              <SkeletonLoader width={160} height={30} />
+            ) : (
+              <>
+                <AppText className="text-3xl text-white font-semibold">
+                  {userProfile?.displayName || "User"}
+                </AppText>
+                <AppText className="text-base text-neutral-400">
+                  {userProfile?.email || ""}
+                </AppText>
+              </>
+            )}
+          </View>
+          <Button title="Edit Profile" onPress={handleGotoEditProfile} />
         </View>
 
         {/* Stats Section */}
         <View className="flex-row justify-around mb-10">
           <View className="bg-neutral-800 p-4 rounded-xl items-center w-[100px] mx-1">
-            <AppText className="text-xl text-primary font-bold">180cm</AppText>
+            <AppText className="text-xl text-primary font-bold">
+              {loadingProfile ? (
+                <SkeletonLoader width={80} height={20} />
+              ) : `${userProfile?.height || "N/A"}cm`}
+            </AppText>
             <AppText className="text-sm text-neutral-400">Height</AppText>
           </View>
           <View className="bg-neutral-800 p-4 rounded-xl items-center w-[100px] mx-1">
-            <AppText className="text-xl text-primary font-bold">65kg</AppText>
-            <AppText className="text-sm text-neutral-400">Weight</AppText>
+            <AppText className="text-xl text-primary font-bold">
+              {loadingProfile ? (
+                <SkeletonLoader width={80} height={20} />
+              ) : `${userProfile?.weight || "N/A"}kg`}
+            </AppText>
+            <AppText className="text-sm text-neutral-400 text-center">Weight</AppText>
           </View>
           <View className="bg-neutral-800 p-4 rounded-xl items-center w-[100px] mx-1">
-            <AppText className="text-xl text-primary font-bold">22yo</AppText>
-            <AppText className="text-sm text-neutral-400">Age</AppText>
+            <AppText className="text-xl text-primary font-bold">
+              {loadingProfile ? (
+                <SkeletonLoader width={80} height={20} />
+              ) : `${userProfile?.age || "N/A"}yo`}
+            </AppText>
+            <AppText className="text-sm text-neutral-400 text-center">Age</AppText>
           </View>
         </View>
 
@@ -72,7 +122,7 @@ export default function SettingsScreen() {
             <SettingItem
               icon="pencil"
               text="Edit profile information"
-              onPress={() => placeholderAction("Edit Profile Info")}
+              onPress={handleGotoEditProfile}
             />
             <SettingItem
               icon="web"
@@ -126,8 +176,6 @@ interface SettingItemProps {
   isValueGreen?: boolean;
 }
 
-
-
 const SettingItem = ({ icon, text, value, onPress, isValueGreen }: SettingItemProps) => (
   <TouchableOpacity
     onPress={onPress}
@@ -136,9 +184,9 @@ const SettingItem = ({ icon, text, value, onPress, isValueGreen }: SettingItemPr
     <View className="w-6 items-center justify-center mr-4 self-center">
       <MaterialCommunityIcons name={icon as any} size={24} color="#ffffff" />
     </View>
-    <AppText className="  text-white flex-1 self-center">{text}</AppText>
+    <AppText className=" text-white flex-1 self-center">{text}</AppText>
     {value && (
-      <AppText className={`  ${isValueGreen ? "text-lime-500" : "text-neutral-400"} self-center`}>
+      <AppText className={` ${isValueGreen ? "text-lime-500" : "text-neutral-400"} self-center`}>
         {value}
       </AppText>
     )}

@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { router, SplashScreen } from 'expo-router';
+import { SplashScreen } from 'expo-router';
 import { onAuthStateChanged, signOut as firebaseSignOut, User } from 'firebase/auth';
-import { auth } from '../../firebaseConfig'; // Your firebase config file
+import { auth } from '../../firebaseConfig';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: any; // You can type this more specifically with Firebase User type
+  user: User | null;
   signOut: () => Promise<void>;
   isLoading: boolean;
 }
@@ -29,21 +29,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(false);
         setUser(null);
       }
+      
       setIsLoading(false);
-      SplashScreen.hideAsync(); // Hide splash screen once auth state is determined
+      SplashScreen.hideAsync();
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
   const signOut = async () => {
     try {
       await firebaseSignOut(auth);
-      // onAuthStateChanged will handle updating the state
-      router.replace('/(auth)/login');
+      // The onAuthStateChanged listener will handle state updates and navigation
     } catch (error) {
       console.error('Sign out error:', error);
+      throw error;
     }
   };
 
