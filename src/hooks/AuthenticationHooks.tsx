@@ -1,14 +1,20 @@
 // hooks/AuthenticationHooks.ts (or wherever your hook is located)
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../../firebaseConfig"; // Ensure this path is correct
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signInWithEmailAndPassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  updatePassword,
+  User, // Import User type
+} from "firebase/auth";import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../../firebaseConfig";
 import { Alert } from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth";
-
+ 
 export const useAuthentication = () => {
-   const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -90,6 +96,38 @@ export const useAuthentication = () => {
     }
   };
 
+  const reauthenticateAndChangePassword = async (currentPassword: string, newPassword: string) => {
+    setLoading(true);
+    const user: User | null = auth.currentUser;
+
+    if (!user || !user.email) {
+      setLoading(false);
+      throw new Error("No authenticated user found or user email is missing.");
+    }
+
+    try {
+      // 1. Re-authenticate the user
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+
+      // 2. Update the password
+      await updatePassword(user, newPassword);
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      console.error("Error reauthenticating or changing password:", error);
+      if (error.code === "auth/wrong-password") {
+        throw new Error("The current password you entered is incorrect.");
+      } else if (error.code === "auth/too-many-requests") {
+        throw new Error("Too many failed attempts. Please try again later.");
+      } else if (error.code === "auth/requires-recent-login") {
+        throw new Error("This operation is sensitive and requires recent authentication. Please log in again.");
+      } else {
+        throw new Error(error.message || "An unexpected error occurred during password change.");
+      }
+    }
+  };
+
   return {
     register,
     setValue,
@@ -100,5 +138,6 @@ export const useAuthentication = () => {
     errors,
     watch,
     trigger,
+    reauthenticateAndChangePassword
   };
 };

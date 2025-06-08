@@ -30,7 +30,11 @@ export default function SettingsScreen() {
   };
 
   const handleGotoEditProfile = () => {
-    router.push("/(modal)/edit-profile");
+    router.replace("/(modal)/edit-profile");
+  }
+
+  const handleGotoChangePassword = () => {
+    router.push("/(modal)/change-password");
   }
 
   // Placeholder function for actions that will be implemented later
@@ -134,7 +138,7 @@ export default function SettingsScreen() {
             <SettingItem
               icon="lock"
               text="Change Password"
-              onPress={() => placeholderAction("Change Password")}
+              onPress={handleGotoChangePassword}
             />
           </View>
         </View>

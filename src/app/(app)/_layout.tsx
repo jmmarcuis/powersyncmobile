@@ -1,7 +1,6 @@
 // app/(app)/_layout.tsx
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function AppLayout() {
@@ -9,8 +8,7 @@ export default function AppLayout() {
   const activeTabColor = '#C6F806'; // Yellow color for active tab and special icons
   const inactiveTabColor = '#8E8E93'; // Gray for inactive icons
   const tabBackgroundColor = '#121212'; // Dark background for the tab bar, similar to image
-  const plusIconBackgroundColor = '#C6F806'; // Yellow background for the plus icon's circle
-  const plusIconColor = '#1C1C1E'; // Dark color for the plus symbol itself
+
 
   return (
     <Tabs
@@ -22,7 +20,7 @@ export default function AppLayout() {
           borderTopWidth: 0, // Removes the top border line from the tab bar
           height: 80, // Adjust height as needed
           paddingBottom: 30, // Pushes icons up if you have a taller tab bar for safe areas
-        paddingTop: 10, // Adds padding to the top of the tab bar
+          paddingTop: 10, // Adds padding to the top of the tab bar
         },
         tabBarActiveTintColor: activeTabColor,
         tabBarInactiveTintColor: inactiveTabColor,
@@ -43,6 +41,15 @@ export default function AppLayout() {
           title: 'Workout',
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="dumbbell" size={iconSize} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="record"
+        options={{
+          title: 'Machine Learning Record',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="record" size={iconSize} color={color} />
           ),
         }}
       />

@@ -1,10 +1,10 @@
 // app/(app)/create.tsx
-import { 
-  View, 
-  TextInput, 
-  Keyboard, 
-  TouchableWithoutFeedback, 
-  TouchableOpacity, 
+import {
+  View,
+  TextInput,
+  Keyboard,
+  TouchableWithoutFeedback,
+  TouchableOpacity,
   ScrollView,
   Image,
   Alert,
@@ -24,11 +24,11 @@ interface VideoUploadForm {
 }
 
 export default function CreateScreen() {
-  const { 
-    uploadVideo, 
-    recordVideo, 
-    pickVideo, 
-    loading, 
+  const {
+    uploadVideo,
+    recordVideo,
+    pickVideo,
+    loading,
     uploadProgress,
     userVideos,
     loadingVideos,
@@ -87,8 +87,8 @@ export default function CreateScreen() {
         "Choose an option",
         [
           { text: "Cancel", style: "cancel" },
-          { 
-            text: "Record Video", 
+          {
+            text: "Record Video",
             onPress: async () => {
               const uri = await recordVideo();
               if (uri) {
@@ -97,8 +97,8 @@ export default function CreateScreen() {
               }
             }
           },
-          { 
-            text: "Choose from Library", 
+          {
+            text: "Choose from Library",
             onPress: async () => {
               const uri = await pickVideo();
               if (uri) {
@@ -141,8 +141,8 @@ export default function CreateScreen() {
       `Are you sure you want to delete "${title}"?`,
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Delete", 
+        {
+          text: "Delete",
           style: "destructive",
           onPress: () => deleteVideo(videoId)
         },
@@ -207,8 +207,8 @@ export default function CreateScreen() {
                 )}
               </View>
 
-              <View>
-                <AppText className="text-white mb-2 font-semibold">Description</AppText>
+              <View className="mb-5">
+                <AppText className="text-white  font-semibold">Description</AppText>
                 <Controller
                   control={control}
                   name="description"
@@ -231,13 +231,13 @@ export default function CreateScreen() {
 
               {/* Upload Progress */}
               {loading && uploadProgress > 0 && (
-                <View className="mt-4">
+                <View className="mt-4 ">
                   <AppText className="text-white text-center mb-2">
                     Uploading... {uploadProgress}%
                   </AppText>
                   <View className="bg-neutral-700 h-3 rounded-full">
-                    <View 
-                      className="bg-lime-500 h-3 rounded-full transition-all duration-300" 
+                    <View
+                      className="bg-lime-500 h-3 rounded-full transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </View>
@@ -245,8 +245,8 @@ export default function CreateScreen() {
               )}
 
               {/* Upload Button */}
-              <Button 
-                title={loading ? "Uploading..." : "Upload Video"} 
+              <Button
+                title={loading ? "Uploading..." : "Upload Video"}
                 onPress={handleSubmit(onSubmit)}
                 disabled={loading}
               />

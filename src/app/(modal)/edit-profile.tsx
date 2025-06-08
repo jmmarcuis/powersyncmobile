@@ -116,7 +116,7 @@ export default function EditProfileScreen() {
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <KeyboardAvoidingView
-                className="flex-1 justify-center px-2 bg-bgdark"
+                className="flex-1 justify-center px-2 bg-neutral-900"
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 keyboardVerticalOffset={80}
             >
