@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { Alert } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
-import { auth, db } from "../../firebaseConfig";
-import { collection, addDoc, query, where, orderBy, onSnapshot, deleteDoc, doc } from "firebase/firestore";
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 export interface VideoUpload {
   id?: string;
@@ -145,7 +145,7 @@ export const useMediaUpload = () => {
     setUploadProgress(0);
 
     try {
-      const user = auth.currentUser;
+      const user = auth().currentUser;
       if (!user) {
         throw new Error("No authenticated user found");
       }
@@ -166,7 +166,7 @@ export const useMediaUpload = () => {
         createdAt: new Date(),
       };
 
-      await addDoc(collection(db, 'videos'), videoData);
+      await firestore().collection('videos').add(videoData);
       
       setUploadProgress(100);
       Alert.alert("Success", "Video uploaded successfully!");
@@ -182,20 +182,18 @@ export const useMediaUpload = () => {
   };
 
   const loadUserVideos = () => {
-    const user = auth.currentUser;
+    const user = auth().currentUser;
     if (!user) return;
 
     setLoadingVideos(true);
 
-    const videosQuery = query(
-      collection(db, 'videos'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
-    );
+    const videosQuery = firestore().collection('videos')
+      .where('userId', '==', user.uid)
+      .orderBy('createdAt', 'desc');
 
-    const unsubscribe = onSnapshot(videosQuery, (snapshot) => {
+    const unsubscribe = videosQuery.onSnapshot((snapshot: any) => {
       const videos: VideoUpload[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach((doc: any) => {
         videos.push({
           id: doc.id,
           ...doc.data()
@@ -203,7 +201,7 @@ export const useMediaUpload = () => {
       });
       setUserVideos(videos);
       setLoadingVideos(false);
-    }, (error) => {
+    }, (error: any) => {
       console.error("Error loading videos:", error);
       setLoadingVideos(false);
     });
@@ -213,12 +211,12 @@ export const useMediaUpload = () => {
 
   const deleteVideo = async (videoId: string) => {
     try {
-      const user = auth.currentUser;
+      const user = auth().currentUser;
       if (!user) {
         throw new Error("No authenticated user found");
       }
 
-      await deleteDoc(doc(db, 'videos', videoId));
+      await firestore().collection('videos').doc(videoId).delete();
       Alert.alert("Success", "Video deleted successfully!");
     } catch (error: any) {
       console.error("Error deleting video:", error);

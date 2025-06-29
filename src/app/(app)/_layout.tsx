@@ -45,11 +45,11 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
-        name="record"
+        name="vision"
         options={{
-          title: 'Machine Learning Record',
+          title: 'WebRTC',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="record" size={iconSize} color={color} />
+            <MaterialCommunityIcons name="eye" size={iconSize} color={color} />
           ),
         }}
       />

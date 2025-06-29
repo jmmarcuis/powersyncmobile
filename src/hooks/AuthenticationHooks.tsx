@@ -1,18 +1,10 @@
 // hooks/AuthenticationHooks.ts (or wherever your hook is located)
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import {
-  createUserWithEmailAndPassword,
-  updateProfile,
-  signInWithEmailAndPassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-  updatePassword,
-  User, // Import User type
-} from "firebase/auth";import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../../firebaseConfig";
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { Alert } from "react-native";
- 
+
 export const useAuthentication = () => {
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +30,7 @@ export const useAuthentication = () => {
   const onLogin = async (data: any) => {
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      await auth().signInWithEmailAndPassword(data.email, data.password);
       // Success: The onAuthStateChanged listener in AuthProvider will detect this
       // and your root layout will handle navigation based on the updated state.
     } catch (err: any) {
@@ -61,12 +53,12 @@ export const useAuthentication = () => {
   const onRegister = async (data: any) => {
     setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await auth().createUserWithEmailAndPassword(data.email, data.password);
       const user = userCredential.user;
 
-      await updateProfile(user, { displayName: data.name });
+      await user.updateProfile({ displayName: data.name });
 
-      await setDoc(doc(db, "users", user.uid), {
+      await firestore().collection('users').doc(user.uid).set({
         uid: user.uid,
         email: data.email,
         displayName: data.name,
@@ -98,7 +90,7 @@ export const useAuthentication = () => {
 
   const reauthenticateAndChangePassword = async (currentPassword: string, newPassword: string) => {
     setLoading(true);
-    const user: User | null = auth.currentUser;
+    const user = auth().currentUser;
 
     if (!user || !user.email) {
       setLoading(false);
@@ -107,11 +99,11 @@ export const useAuthentication = () => {
 
     try {
       // 1. Re-authenticate the user
-      const credential = EmailAuthProvider.credential(user.email, currentPassword);
-      await reauthenticateWithCredential(user, credential);
+      const credential = auth.EmailAuthProvider.credential(user.email, currentPassword);
+      await user.reauthenticateWithCredential(credential);
 
       // 2. Update the password
-      await updatePassword(user, newPassword);
+      await user.updatePassword(newPassword);
       setLoading(false);
     } catch (error: any) {
       setLoading(false);

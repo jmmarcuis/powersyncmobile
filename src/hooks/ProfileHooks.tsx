@@ -1,8 +1,7 @@
 // hooks/ProfileHooks.ts
 import { useState } from "react";
-import { updateProfile } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
-import { auth, db } from "../../firebaseConfig";
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { Alert } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 
@@ -70,7 +69,7 @@ export const useProfileUpdate = () => {
     setUploadProgress(0);
 
     try {
-      const user = auth.currentUser;
+      const user = auth().currentUser;
       if (!user) {
         throw new Error("No authenticated user found");
       }
@@ -85,7 +84,7 @@ export const useProfileUpdate = () => {
       setUploadProgress(85);
 
       // Update Firebase Auth profile
-      await updateProfile(user, {
+      await user.updateProfile({
         displayName: data.displayName,
         ...(profileImageUrl && { photoURL: profileImageUrl })
       });
@@ -93,7 +92,7 @@ export const useProfileUpdate = () => {
       setUploadProgress(95);
 
       // Update Firestore document
-      const userDocRef = doc(db, "users", user.uid);
+      const userDocRef = firestore().collection('users').doc(user.uid);
       const updateData: any = {
         displayName: data.displayName,
         age: parseInt(data.age),
@@ -106,7 +105,7 @@ export const useProfileUpdate = () => {
         updateData.profileImageUrl = profileImageUrl;
       }
 
-      await updateDoc(userDocRef, updateData);
+      await userDocRef.update(updateData);
       
       setUploadProgress(100);
       Alert.alert("Success", "Profile updated successfully!");

@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { SplashScreen } from 'expo-router';
-import { onAuthStateChanged, signOut as firebaseSignOut, User } from 'firebase/auth';
-import { auth } from '../../firebaseConfig';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: User | null;
+  user: FirebaseAuthTypes.User | null;
   signOut: () => Promise<void>;
   isLoading: boolean;
 }
@@ -14,12 +13,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Listen to Firebase auth state changes
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = auth().onAuthStateChanged((firebaseUser) => {
       if (firebaseUser) {
         // User is signed in
         setIsAuthenticated(true);
@@ -39,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
-      await firebaseSignOut(auth);
+      await auth().signOut();
       // The onAuthStateChanged listener will handle state updates and navigation
     } catch (error) {
       console.error('Sign out error:', error);

@@ -1,3 +1,5 @@
+// This file is no longer needed. Use @react-native-firebase modules directly in your code.
+
 import { initializeApp } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import { getFirestore } from 'firebase/firestore';

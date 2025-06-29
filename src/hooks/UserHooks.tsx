@@ -1,9 +1,8 @@
 // hooks/UserHooks.ts
 import { useState, useEffect } from "react";
-import { auth, db } from "../../firebaseConfig";
-import { doc, getDoc } from "firebase/firestore";
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import type { UserProfile } from "../types/UserProfile";
-
 
 export const useUserProfile = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -13,10 +12,10 @@ export const useUserProfile = () => {
     const fetchUserProfile = async () => {
       try {
         setLoadingProfile(true);
-        const user = auth.currentUser;
+        const user = auth().currentUser;
         if (user) {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDocSnap = await getDoc(userDocRef);
+          const userDocRef = firestore().collection('users').doc(user.uid);
+          const userDocSnap = await userDocRef.get();
           if (userDocSnap.exists()) {
             setUserProfile(userDocSnap.data() as UserProfile);
           } else {
@@ -31,9 +30,7 @@ export const useUserProfile = () => {
         setLoadingProfile(false);
       }
     };
-
     fetchUserProfile();
   }, []);
-
   return { userProfile, loadingProfile };
 };
