@@ -24,10 +24,13 @@ export default function VisionScreen() {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' },
-            { urls: 'stun:stun3.l.google.com:19302' }, // Added more STUN servers for robustness
-            { urls: 'stun:stun4.l.google.com:19302' },
+            {
+                urls: 'turn:openrelay.metered.ca:80',
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+            }
         ]
+
     };
 
     // Request permissions using React Native APIs
@@ -75,14 +78,14 @@ export default function VisionScreen() {
             Alert.alert('Permission Error', 'Camera and microphone permissions are required');
             return null;
         }
-        
+
         try {
             const stream = await mediaDevices.getUserMedia({
                 audio: false,
                 video: {
                     width: 640,
                     height: 480,
-                    frameRate: 60,
+                    frameRate: 30,
                     facingMode: 'user', // Use 'environment' for back camera
                 },
             });
@@ -99,7 +102,7 @@ export default function VisionScreen() {
     // Initialize signaling with WebSocket connection status
     const initializeSignaling = () => {
         console.log('🔌 Initializing WebSocket connection...');
-        
+
         // Ensure only one socket connection is active
         if (socketRef.current) {
             socketRef.current.disconnect();
@@ -150,21 +153,21 @@ export default function VisionScreen() {
                         return;
                     }
                 }
-                
+
                 const offer = new RTCSessionDescription({
                     type: data.type,
                     sdp: data.sdp
                 });
-                
+
                 await peerConnectionRef.current.setRemoteDescription(offer);
                 const answer = await peerConnectionRef.current.createAnswer();
                 await peerConnectionRef.current.setLocalDescription(answer);
-                
+
                 socketRef.current.emit('answer', {
                     type: answer.type,
                     sdp: answer.sdp
                 });
-                
+
                 console.log('✅ Answer sent to server');
                 setIsCallStarted(true); // Indicate that a call has been started
             } catch (error) {
@@ -237,7 +240,10 @@ export default function VisionScreen() {
         peerConnection.ontrack = (event) => {
             console.log('📹 Remote track received:', event.track.kind);
             if (event.streams && event.streams[0]) {
-                setRemoteStream(event.streams[0]);
+                const stream = event.streams[0];
+                if (!remoteStream || remoteStream.id !== stream.id) {
+                    setRemoteStream(stream);
+                }
             }
         };
 
@@ -258,7 +264,7 @@ export default function VisionScreen() {
             const state = peerConnection.connectionState;
             console.log('🔗 WebRTC Connection state changed:', state);
             setConnectionStatus(state);
-            
+
             switch (state) {
                 case 'connected':
                     console.log('✅ WebRTC connection established!');
@@ -304,7 +310,7 @@ export default function VisionScreen() {
                 await peerConnectionRef.current.close();
                 peerConnectionRef.current = null;
             }
-            
+
             const stream = await initializeMedia();
             if (stream) {
                 peerConnectionRef.current = createPeerConnection(stream);
@@ -313,13 +319,13 @@ export default function VisionScreen() {
                     offerToReceiveVideo: true
                 });
                 await peerConnectionRef.current.setLocalDescription(offer);
-                
+
                 console.log('📨 Sending offer to server');
                 socketRef.current.emit('offer', {
                     type: offer.type,
                     sdp: offer.sdp
                 });
-                
+
                 setIsCallStarted(true);
                 setConnectionStatus('connecting'); // Set status to connecting
             } else {
@@ -338,12 +344,12 @@ export default function VisionScreen() {
     // End call function
     const endCall = () => {
         console.log('📞 Ending call...');
-        
+
         if (peerConnectionRef.current) {
             peerConnectionRef.current.close();
             peerConnectionRef.current = null;
         }
-        
+
         if (localStream) {
             localStream.getTracks().forEach(track => {
                 track.stop();
@@ -351,7 +357,7 @@ export default function VisionScreen() {
             });
             setLocalStream(null);
         }
-        
+
         if (remoteStream) {
             remoteStream.getTracks().forEach(track => {
                 track.stop(); // Ensure remote tracks are also stopped
@@ -359,7 +365,7 @@ export default function VisionScreen() {
             });
             setRemoteStream(null);
         }
-        
+
         setIsCallStarted(false);
         setConnectionStatus('disconnected');
         console.log('Call ended. State reset.');
@@ -386,24 +392,26 @@ export default function VisionScreen() {
                 <Text className="text-white font-bold">{getStatusText()}</Text>
             </View>
 
-            {/* Remote Video (Main View) */}
-            <View className="w-full h-full">
-                {remoteStream ? (
+            {/* Remote Video (Full Screen) - IMPROVED */}
+            <View style={{ flex: 1 }}>
+                {remoteStream && (
                     <RTCView
                         streamURL={remoteStream.toURL()}
-                        className="w-full h-full"
-                        objectFit="cover"
+                        style={{
+                            flex: 1,
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'black' // Prevent white flashes
+                        }}
+                        objectFit={'cover'}
+                        mirror={false}
+                        zOrder={0}
                     />
-                ) : (
-                    <View className="flex-1 items-center justify-center">
-                        <Text className="text-white text-xl mb-4">
-                            {isCallStarted ? 'Waiting for connection...' : 'Ready to start call'}
-                        </Text>
-                        {isCallStarted && (
-                            <Text className="text-gray-400 text-sm">
-                                Connection Status: {connectionStatus}
-                            </Text>
-                        )}
+                )}
+                {/* Show loading indicator when no remote stream */}
+                {!remoteStream && isCallStarted && (
+                    <View className="flex-1 justify-center items-center">
+                        <Text className="text-white text-lg">Connecting to video...</Text>
                     </View>
                 )}
             </View>
