@@ -171,22 +171,3 @@ powersyncmobile/
 * **Build fails**: Make sure your app doesn't contain Expo Go-only libraries. Use `expo doctor` to validate.
 
 ---
-
-## 📋 To-Do / Coming Soon
-
-* Auto rep-count detection
-* History & analytics dashboard
-* Offline feedback mode
-* Enhanced feedback using joint velocity and symmetry
-
----
-
-## 🙌 Contributing
-
-PRs welcome! Please fork the repo and submit a pull request.
-
----
-
-## 📄 License
-
-MIT License © 2025 Jhainno Allrick Marcos
