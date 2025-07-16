@@ -1,63 +1,108 @@
-🏋️ PowerSync
+# 🏋️ PowerSync
 
-PowerSync is a mobile app designed for powerlifters to track and analyze their form through real-time pose estimation. It streams video to a FastAPI backend for AI-based feedback using models like MoveNet. Built with React Native (Expo), the app is compatible with Android devices via Expo Go.
+**PowerSync** is a mobile app designed for powerlifters to track and analyze their form through real-time pose estimation. It streams video to a FastAPI backend for AI-based feedback using models like MoveNet. Built with **React Native (Expo)** and native modules, the app must be built and sideloaded—it is **not compatible with Expo Go**.
 
-📱 Features
+---
 
-    Live video streaming from your phone camera
+## 📱 Features
 
-    Real-time pose estimation using AI models
+* Live video streaming from your phone camera
+* Real-time pose estimation using AI models
+* Backend processing with FastAPI + WebRTC
+* Frontend built with React Native + Expo (with native modules)
+* Easy connection to server with STUN/TURN ICE configuration
 
-    Backend processing with FastAPI + WebRTC
+---
 
-    Frontend built with React Native + Expo
+## 🛠️ Requirements
 
-    Easy connection to server with STUN/TURN ICE configuration
+### Local Development
 
-🛠️ Requirements
-Local Development
-Tool	Version Recommended
-Node.js	>= 18.x
-Yarn	>= 1.x
-Expo CLI	>= 7.x
-Android Phone	Expo Go App (latest)
-Git	Any recent version
-🚀 Getting Started
-1. Clone the Repository
+| Tool          | Version Recommended                    |
+| ------------- | -------------------------------------- |
+| Node.js       | `>= 18.x`                              |
+| Yarn          | `>= 1.x`                               |
+| Expo CLI      | `>= 7.x`                               |
+| EAS CLI       | `>= 3.x`                               |
+| Android Phone | APK installer or USB Debugging enabled |
+| Git           | Any recent version                     |
 
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+```sh
 git clone https://github.com/jmmarcuis/powersyncmobile.git
 cd powersyncmobile
+```
 
-2. Install Dependencies
+---
 
+### 2. Install Dependencies
+
+```sh
 yarn install
 # OR if yarn doesn't work:
 npm install
+```
 
-3. Install Expo CLI (if not installed)
+---
 
-npm install -g expo-cli
+### 3. Install Expo & EAS CLI (if not installed)
 
-4. Run the App on Android
+```sh
+npm install -g expo-cli eas-cli
+```
 
-Make sure your Android phone and development machine are on the same WiFi network.
+---
 
-expo start
+### 4. Configure EAS Build
 
-    This will open a QR code in your terminal or browser.
+Make sure your `eas.json` is properly configured. Here's a sample:
 
-    Open the Expo Go app on your Android phone.
+```json
+{
+  "build": {
+    "production": {
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  }
+}
+```
 
-    Scan the QR code.
+---
 
-    The app will launch on your phone.
+### 5. Build and Sideload the APK
 
-🌐 Connect to FastAPI Backend
+Build the project using EAS:
 
-This app is designed to stream video to a WebRTC-compatible FastAPI server for pose estimation.
+```sh
+eas build -p android --profile production
+```
+
+After the build completes, download the APK from the Expo dashboard.
+
+Then sideload it to your Android phone:
+
+```sh
+adb install app-release.apk
+```
+
+> ⚠️ Ensure that **USB debugging is enabled** on your Android device and **apps from unknown sources** are allowed.
+
+---
+
+## 🌐 Connect to FastAPI Backend
+
+This app is designed to stream video to a WebRTC-compatible **FastAPI** server for pose estimation.
 
 Update your WebSocket signaling server URL and ICE servers in the config:
 
+```ts
 const configuration = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -66,14 +111,19 @@ const configuration = {
 };
 
 const SIGNALING_SERVER_URL = 'http://<YOUR_BACKEND_IP>:8000';
+```
 
-Replace <YOUR_BACKEND_IP> with the LAN IP of your FastAPI backend server.
-⚙️ FastAPI Backend Setup (Pose Estimation)
+Replace `<YOUR_BACKEND_IP>` with the LAN IP of your FastAPI backend server.
+
+---
+
+## ⚙️ FastAPI Backend Setup (Pose Estimation)
 
 This app is meant to connect to a separate backend using WebRTC + AI.
 
 You can clone the backend repository and set it up like this:
 
+```sh
 git clone https://github.com/jmmarcuis/powersync-backend.git
 cd powersync-backend
 
@@ -86,19 +136,20 @@ pip install -r requirements.txt
 
 # Run server
 uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
 
 Backend handles:
 
-    WebRTC signaling via socket.io
+* WebRTC signaling via socket.io
+* Frame capture and decoding via aiortc
+* Pose estimation using MoveNet via TensorFlow
+* Processed frame queue + optional return video stream
 
-    Frame capture and decoding via aiortc
+---
 
-    Pose estimation using MoveNet via TensorFlow
+## 📂 Project Structure
 
-    Processed frame queue + optional return video stream
-
-📂 Project Structure
-
+```
 powersyncmobile/
 ├── App.js
 ├── components/
@@ -107,23 +158,35 @@ powersyncmobile/
 ├── assets/
 ├── constants/
 └── package.json
+```
 
-🧪 Troubleshooting
+---
 
-    App stuck reconnecting: Make sure backend is accessible and CORS is configured.
+## 🧪 Troubleshooting
 
-    Blank remote stream: Verify STUN/TURN servers work or are regionally close.
+* **App stuck reconnecting**: Make sure backend is accessible and CORS is configured.
+* **Blank remote stream**: Verify STUN/TURN servers work or are regionally close.
+* **Camera/mic permissions**: Ensure Android permissions are granted after installation.
+* **APK fails to install**: Ensure the device allows apps from unknown sources and USB debugging is enabled.
+* **Build fails**: Make sure your app doesn't contain Expo Go-only libraries. Use `expo doctor` to validate.
 
-    Camera permissions issue: Ensure Expo Go has camera & mic access.
+---
 
-    QR not scanning: Use LAN IP or tunnel via npx expo start --tunnel.
+## 📋 To-Do / Coming Soon
 
-📋 To-Do / Coming Soon
+* Auto rep-count detection
+* History & analytics dashboard
+* Offline feedback mode
+* Enhanced feedback using joint velocity and symmetry
 
-    Auto rep-count detection
+---
 
-    History & analytics dashboard
+## 🙌 Contributing
 
-    Offline feedback mode
+PRs welcome! Please fork the repo and submit a pull request.
 
-    Enhanced feedback using joint velocity and symmetry
+---
+
+## 📄 License
+
+MIT License © 2025 Jhainno Allrick Marcos
